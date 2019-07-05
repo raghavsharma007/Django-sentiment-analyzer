@@ -21,3 +21,49 @@ with open('hospitals.csv', 'w',encoding = 'utf-8-sig', newline='') as f:
     writer.writeheader()
     for hospitals in all_hospitals:
         writer.writerow(hospitals)
+
+
+----------------------------------------------------------------------------------------
+
+import requests
+import csv
+from bs4 import BeautifulSoup
+import random
+
+user_agents=['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36'
+    ,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
+    ,'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1'
+    ,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36']
+
+all_hospitals = []
+
+for i in range(1,11):
+    url = f'https://www.practo.com/delhi/hospitals?page={i}'
+    res = requests.get(url, headers={'User-Agent':random.choice(user_agents)})
+    html_doc = res.text
+    soup = BeautifulSoup(html_doc, 'html.parser')
+
+    outer_divs = soup.findAll('div',{'data-qa-id':'hospital_card'})
+
+    for div in outer_divs:
+        obj = {}
+        obj['Hospital_name'] = soup.find('h2', {'data-qa-id':'hospital_name'}).text
+        obj['Specialization'] = soup.find('div',{'data-qa-id':'hospital-specialization'}).text
+        obj['No.of Doctors'] = soup.find('div',{'data-qa-id':"doctors_count"}).text
+        # obj['Rating'] = soup.find('div',{'data-qa-id':'start_rating'}).text[:11]
+        obj['Place'] = soup.find('h3',{'data-qa-id':'practice_locality'}).text
+        all_hospitals.append(obj)
+
+headlines = ['Hospital_name', 'Specialization', 'No.of Doctors', 'Rating', 'Place']
+
+with open('hospitals.csv', 'w',encoding = 'utf-8-sig', newline='') as f:
+    writer = csv.DictWriter(f, delimiter=',',fieldnames=headlines)
+    writer.writeheader()
+    for hospitals in all_hospitals:
+        writer.writerow(hospitals)
