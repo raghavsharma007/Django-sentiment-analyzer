@@ -67,3 +67,49 @@ with open('hospitals.csv', 'w',encoding = 'utf-8-sig', newline='') as f:
     writer.writeheader()
     for hospitals in all_hospitals:
         writer.writerow(hospitals)
+        
+ -------------------------------------------------------------------       
+        
+import requests
+from bs4 import BeautifulSoup
+from random import choice
+import csv
+def get_proxy():
+    url = 'https://www.sslproxies.org/'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    return {'https': choice(list(map(lambda x:x[0]+':'+x[1],list(zip(map(lambda x:x.text, soup.findAll('td')[::8]),
+    map(lambda x:x.text, soup.findAll('td')[1::8]))))))}
+
+def proxy_request(request_type, url, **kwargs):
+    while 1:
+        try:
+            proxy = get_proxy()
+            r = requests.request(request_type, url, proxies=proxy, timeout=5, **kwargs)
+            break
+        except:
+            pass
+    return r
+
+r = proxy_request('get', 'https://www.practo.com/delhi/hospitals?page=2')
+html_doc = r.text
+
+soup = BeautifulSoup(html_doc, 'html.parser')
+all_hospitals=[]
+
+outer_divs = soup.findAll('div', {'data-qa-id':'hospital_card'})
+
+for div in outer_divs:
+    obj={}
+    obj['Hospital_name'] = div.find('h2', {'data-qa-id':'hospital_name'}).text
+    obj['doctors_count'] = div.find('div', {'data-qa-id':'doctors_count'}).text
+    all_hospitals.append(obj)
+headlines = ['Hospital_name', 'doctors_count']
+with open('hospitals2.csv', 'w',encoding = 'utf-8-sig', newline='') as f:
+    writer = csv.DictWriter(f,headlines)
+    writer.writeheader()
+    for hospitals in all_hospitals:
+        writer.writerow(hospitals)
+
+        
+        
