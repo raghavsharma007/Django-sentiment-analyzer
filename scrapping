@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-res = requests.get('https://www.practo.com/delhi/hospitals')
+res = requests.get('#')
 html_doc = res.text
 
 soup = BeautifulSoup(html_doc, 'html.parser')
@@ -44,7 +44,7 @@ user_agents=['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 all_hospitals = []
 
 for i in range(1,11):
-    url = f'https://www.practo.com/delhi/hospitals?page={i}'
+    url = f'#?page={i}'
     res = requests.get(url, headers={'User-Agent':random.choice(user_agents)})
     html_doc = res.text
     soup = BeautifulSoup(html_doc, 'html.parser')
@@ -91,7 +91,7 @@ def proxy_request(request_type, url, **kwargs):
             pass
     return r
 
-r = proxy_request('get', 'https://www.practo.com/delhi/hospitals?page=2')
+r = proxy_request('get', '#?page=2')
 html_doc = r.text
 
 soup = BeautifulSoup(html_doc, 'html.parser')
